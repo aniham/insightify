@@ -19,10 +19,10 @@ const snowflakeToAEPMapping = {
   'GEO_LATITUDE': 'geo_latitude',
   'GEO_LONGITUDE': 'geo_longitude',
   'GEO_REGION_NAME': 'geo_region_name',
-  'PAGE_URL': 'page_url',
-  'PAGE_REFERRER': 'page_referrer',
-  'REFR_MEDIUM': 'refr_medium',
-  'REFR_SOURCE': 'refr_source',
+  // 'PAGE_URL': 'page_url',
+  // 'PAGE_REFERRER': 'page_referrer',
+  // 'REFR_MEDIUM': 'refr_medium',
+  // 'REFR_SOURCE': 'refr_source',
   'GEO_TIMEZONE': 'geo_timezone',
   // 'CONTEXTS_COM_ADOBE_MAGENTO_ENTITY_RECOMMENDATION_UNIT_1': 'recommendation_context',
   // 'CONTEXTS_COM_ADOBE_MAGENTO_ENTITY_RECOMMENDED_ITEM_1': 'recommended_product',
@@ -44,6 +44,16 @@ function convertAtomicEventToAEPEvent(atomicEvent) {
     },
     _id: atomicEvent.EVENT_ID,
     timestamp: moment(atomicEvent.DVCE_CREATED_TSTAMP, 'YYYY-MM-DD HH:mm:ss.SSS').toISOString(),
+        // TODO: web data (AEP web schema - must add)
+    web: {
+      webPageDetails: {
+        URL: atomicEvent.PAGE_URL,
+      },
+      webReferrer: {
+        URL: atomicEvent.PAGE_REFERRER,
+        type: atomicEvent.REFR_MEDIUM,
+      }
+    },
     identityMap: {
       commerceShopperId: [
         {
@@ -104,8 +114,6 @@ function convertAtomicEventToAEPEvent(atomicEvent) {
         type: recommendationUnit.recType,
       }
     }
-
-    // TODO: web data (AEP web schema - must add)
   } 
 
   return aepEvent;
