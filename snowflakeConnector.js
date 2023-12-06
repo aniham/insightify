@@ -86,10 +86,12 @@ function convertAtomicEventToAEPEvent(atomicEvent) {
       // product data for views will be different - this assumes single product in event which is fine for cliks/adds
       const recommendedProduct = JSON.parse(atomicEvent.CONTEXTS_COM_ADOBE_MAGENTO_ENTITY_RECOMMENDED_ITEM_1)[0];
 
-      // TODO add rest of fields
       aepEvent.productListItems = [{
         priceTotal: recommendedProduct.prices.minimum.final,
         sku: recommendedProduct.sku,
+        name: recommendedProduct.name,
+        productImageUrl: recommendedProduct.imageUrl,
+        currencyCode: recommendedProduct.currencyCode,
       }];
     }
 
