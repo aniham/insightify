@@ -1,65 +1,100 @@
-[
-    {
-        "_id": "0001",
-        "_commerceprojectbeacon": {
-            "imerchStrategy": "bought_also_bought"
+[{
+    "_id": "1",
+    "timestamp": "2023-01-01T10:00:00Z",
+    "commerce": {
+      "_commerceprojectbeacon": {
+        "productRecViews": {
+          "value": 5,
+          "id": "product1"
         },
-        "commerce": {
-            "_commerceprojectbeacon": {
-                "productRecViews": {
-                    "id": "1"
-                }
-            }
+        "productRecClicks": {
+          "value": 2,
+          "id": "product2"
         },
-        "productListItems": [{
-            "SKU": "ABCD-1234",
-            "priceTotal": 105
-        }],
-        "timestamp": "1701714100",
-        "identityMap": {
-            "commerceShopperId": "1A2B3C4D"
+        "productRecAddToCarts": {
+          "value": 1,
+          "id": "product3"
         }
-    },
-    {
-        "_id": "0002",
-        "_commerceprojectbeacon": {
-            "imerchStrategy": "bought_also_bought"
-        },
-        "commerce": {
-            "_commerceprojectbeacon": {
-                "productRecClicks": {
-                    "id": "1"
-                }
-            }
-        },
-        "productListItems": [{
-            "SKU": "ABCD-1234",
-            "priceTotal": 105
-        }],
-        "timestamp": "1701714100",
-        "identityMap": {
-            "commerceShopperId": "1A2B3C4D"
-        }
-    },
-    {
-        "_id": "0003",
-        "_commerceprojectbeacon": {
-            "imerchStrategy": "bought_also_bought"
-        },
-        "commerce": {
-            "_commerceprojectbeacon": {
-                "productRecAddToCarts": {
-                    "id": "1"
-                }
-            }
-        },
-        "productListItems": [{
-            "SKU": "ABCD-1234",
-            "priceTotal": 105
-        }],
-        "timestamp": "1701714100",
-        "identityMap": {
-            "commerceShopperId": "1A2B3C4D"
-        }
+      }
     }
-]
+  },
+  {
+    "_id": "2",
+    "timestamp": "2023-01-02T15:30:00Z",
+    "commerce": {
+      "_commerceprojectbeacon": {
+        "productRecViews": {
+          "value": 3,
+          "id": "product4"
+        },
+        "productRecClicks": {
+          "value": 0,
+          "id": "product5"
+        },
+        "productRecAddToCarts": {
+          "value": 2,
+          "id": "product6"
+        }
+      }
+    }
+  },
+  {
+    "_id": "3",
+    "timestamp": "2023-01-03T08:45:00Z",
+    "commerce": {
+      "_commerceprojectbeacon": {
+        "productRecViews": {
+          "value": 1,
+          "id": "product7"
+        },
+        "productRecClicks": {
+          "value": 4,
+          "id": "product8"
+        },
+        "productRecAddToCarts": {
+          "value": 0,
+          "id": "product9"
+        }
+      }
+    }
+  },
+  {
+    "_id": "4",
+    "timestamp": "2023-01-04T12:15:00Z",
+    "commerce": {
+      "_commerceprojectbeacon": {
+        "productRecViews": {
+          "value": 2,
+          "id": "product10"
+        },
+        "productRecClicks": {
+          "value": 3,
+          "id": "product11"
+        },
+        "productRecAddToCarts": {
+          "value": 1,
+          "id": "product12"
+        }
+      }
+    }
+  },
+  {
+    "_id": "5",
+    "timestamp": "2022-01-05T16:30:00Z",
+    "commerce": {
+      "_commerceprojectbeacon": {
+        "productRecViews": {
+          "value": 0,
+          "id": "product13"
+        },
+        "productRecClicks": {
+          "value": 5,
+          "id": "product14"
+        },
+        "productRecAddToCarts": {
+          "value": 2,
+          "id": "product15"
+        }
+      }
+    }
+  }]
