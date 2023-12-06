@@ -5,29 +5,6 @@ const moment = require('moment');
 const atomicEventsFilePath = 'atomic_recs_data.csv';
 const aepEventsFilePath = 'aep_recs_data.json';
 
-const snowflakeToAEPMapping = {
-  // 'EVENT_ID': '_id',
-  // 'DVCE_CREATED_TSTAMP': 'timestamp',
-  // 'SE_CATEGORY': 'category', 
-  // 'SE_ACTION': 'action',  
-  // 'DOMAIN_USERID': 'commerceShopperId',
-  'DOMAIN_SESSIONIDX': 'session',
-  'GEO_COUNTRY': 'geo_country',
-  'GEO_REGION': 'geo_region',
-  'GEO_CITY': 'geo_city',
-  'GEO_ZIPCODE': 'geo_zipcode',
-  'GEO_LATITUDE': 'geo_latitude',
-  'GEO_LONGITUDE': 'geo_longitude',
-  'GEO_REGION_NAME': 'geo_region_name',
-  // 'PAGE_URL': 'page_url',
-  // 'PAGE_REFERRER': 'page_referrer',
-  // 'REFR_MEDIUM': 'refr_medium',
-  // 'REFR_SOURCE': 'refr_source',
-  'GEO_TIMEZONE': 'geo_timezone',
-  // 'CONTEXTS_COM_ADOBE_MAGENTO_ENTITY_RECOMMENDATION_UNIT_1': 'recommendation_context',
-  // 'CONTEXTS_COM_ADOBE_MAGENTO_ENTITY_RECOMMENDED_ITEM_1': 'recommended_product',
-};
-
 csvtojson()
   .fromFile(atomicEventsFilePath)
   .then((atomicEvents) => {
@@ -40,7 +17,16 @@ csvtojson()
 function convertAtomicEventToAEPEvent(atomicEvent) {
   const aepEvent = {
     commerce: {
-      _commerceprojectbeacon: {},
+      _commerceprojectbeacon: {
+        geo_country: atomicEvent.GEO_COUNTRY,
+        geo_region: atomicEvent.GEO_REGION,
+        geo_city: atomicEvent.GEO_CITY,
+        geo_zipcode: atomicEvent.GEO_ZIPCODE,
+        geo_latitude: Number(atomicEvent.GEO_LATITUDE),
+        geo_longitude: Number(atomicEvent.GEO_LONGITUDE),
+        geo_region_name: atomicEvent.GEO_REGION_NAME,
+        geo_timezone: atomicEvent.GEO_TIMEZONE,
+      },
     },
     _id: atomicEvent.EVENT_ID,
     timestamp: moment(atomicEvent.DVCE_CREATED_TSTAMP, 'YYYY-MM-DD HH:mm:ss.SSS').toISOString(),
@@ -63,13 +49,6 @@ function convertAtomicEventToAEPEvent(atomicEvent) {
       ]
     }
   };
-
-  /* 1x1 mapping (diff names) */
-  Object.entries(snowflakeToAEPMapping).forEach(([snowflakeField, aepField]) => {
-    const snowflakeValue = atomicEvent[snowflakeField];
-    const aepValue = isJsonString(snowflakeValue) ? JSON.parse(snowflakeValue) : snowflakeValue;
-    aepEvent[aepField] = aepValue;
-  });
 
   /* special cases */
   if (atomicEvent.SE_CATEGORY === 'recommendation-unit') { // all events are recommendation-units for now
@@ -98,7 +77,7 @@ function convertAtomicEventToAEPEvent(atomicEvent) {
 
       aepEvent.productListItems = [{
         priceTotal: recommendedProduct.prices.minimum.final,
-        sku: recommendedProduct.sku,
+        SKU: recommendedProduct.sku,
         name: recommendedProduct.name,
         productImageUrl: recommendedProduct.imageUrl,
         currencyCode: recommendedProduct.currencyCode,
@@ -117,13 +96,4 @@ function convertAtomicEventToAEPEvent(atomicEvent) {
   } 
 
   return aepEvent;
-}
-
-function isJsonString(str) {
-  try {
-    JSON.parse(str);
-  } catch (e) {
-    return false;
-  }
-  return true;
 }
