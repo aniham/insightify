@@ -1,0 +1,65 @@
+[
+    {
+        "_id": "0001",
+        "_commerceprojectbeacon": {
+            "imerchStrategy": "bought_also_bought"
+        },
+        "commerce": {
+            "_commerceprojectbeacon": {
+                "productRecViews": {
+                    "id": "1"
+                }
+            }
+        },
+        "productListItems": [{
+            "SKU": "ABCD-1234",
+            "priceTotal": 105
+        }],
+        "timestamp": "1701714100",
+        "identityMap": {
+            "commerceShopperId": "1A2B3C4D"
+        }
+    },
+    {
+        "_id": "0002",
+        "_commerceprojectbeacon": {
+            "imerchStrategy": "bought_also_bought"
+        },
+        "commerce": {
+            "_commerceprojectbeacon": {
+                "productRecClicks": {
+                    "id": "1"
+                }
+            }
+        },
+        "productListItems": [{
+            "SKU": "ABCD-1234",
+            "priceTotal": 105
+        }],
+        "timestamp": "1701714100",
+        "identityMap": {
+            "commerceShopperId": "1A2B3C4D"
+        }
+    },
+    {
+        "_id": "0003",
+        "_commerceprojectbeacon": {
+            "imerchStrategy": "bought_also_bought"
+        },
+        "commerce": {
+            "_commerceprojectbeacon": {
+                "productRecAddToCarts": {
+                    "id": "1"
+                }
+            }
+        },
+        "productListItems": [{
+            "SKU": "ABCD-1234",
+            "priceTotal": 105
+        }],
+        "timestamp": "1701714100",
+        "identityMap": {
+            "commerceShopperId": "1A2B3C4D"
+        }
+    }
+]

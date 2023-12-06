@@ -1,0 +1,23 @@
+[
+    {
+        "_id": "0001",
+        "_commerceprojectbeacon": {
+            "imerchStrategy": "bought_also_bought"
+        },
+        "commerce": {
+            "_commerceprojectbeacon": {
+                "productRecViews": {
+                    "id": "1"
+                }
+            }
+        },
+        "productListItems": [{
+            "SKU": "ABCD-1234",
+            "priceTotal": 105
+        }],
+        "timestamp": "2023-12-04-T12:45:00Z",
+        "identityMap": {
+            "commerceShopperId": "1A2B3C4D"
+        }
+    }
+]
