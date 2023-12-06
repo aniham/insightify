@@ -2,5 +2,13 @@
 
 package-lock.json
 
-aep_recs_data.json
 atomic_recs_data.csv
+aep_recs_data.json
+atomic_order_data.csv
+aep_order_data.json
+atomic_product_data.csv
+aep_product_data.json
+tracked_searches_data.csv
+tracked_searches_data.json
+web_page_data.csv
+web_page_data.json
