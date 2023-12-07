@@ -52,32 +52,42 @@ function convertTrackedSearchToAEPEventSet(trackedSearch) {
   const productsClicked = trackedSearch.PRODUCTS_CLICKED ? JSON.parse(trackedSearch.PRODUCTS_CLICKED) : [];
 
   // tracked search has no clicks, send just event for view
-  if (!productsClicked || !productsClicked.length) {
-    const aepEvent = createBoilerPlateAEPEvent(trackedSearch);
-    
-    aepEvent.commerce._commerceprojectbeacon.searchResultViews = {
-      value: 1
+  const aepViewEvent = createBoilerPlateAEPEvent(trackedSearch);
+  aepViewEvent._id = trackedSearch.REQUEST_ID;
+
+  aepViewEvent.commerce._commerceprojectbeacon.search = {
+    query: trackedSearch.QUERY_STRING,
+    requestID: trackedSearch.REQUEST_ID,
+  }
+  
+  aepViewEvent.commerce._commerceprojectbeacon.searchResultViews = {
+    value: 1
+  }
+
+  aepViewEvent.productListItems = products.map((product) => {
+    const aepProduct = {
+      priceTotal: product.price,
+      SKU: product.sku,
+      name: product.name,
+      productImageUrl: product.imageUrl,
+      currencyCode: 'USD', // TODO from storefront context
     }
+    return aepProduct;
+  });;
 
-    aepEvent.productListItems = products.map((product) => {
-      const aepProduct = {
-        priceTotal: product.price,
-        SKU: product.sku,
-        name: product.name,
-        productImageUrl: product.imageUrl,
-        currencyCode: 'USD', // TODO from storefront context
-      }
-      return aepProduct;
-    });;
-
-    eventSet.push(aepEvent);
-  } 
+  eventSet.push(aepViewEvent);
   
   // send an event for each click
   if (productsClicked && productsClicked.length) {
     // console.log(JSON.stringify(productsClicked));
     productsClicked.forEach((clickedProduct) => {
       const aepClickEvent = createBoilerPlateAEPEvent(trackedSearch);
+      aepClickEvent._id = trackedSearch.REQUEST_ID + clickedProduct.sku;
+
+      aepClickEvent.commerce._commerceprojectbeacon.search = {
+        query: trackedSearch.QUERY_STRING,
+        requestID: trackedSearch.REQUEST_ID,
+      }
 
       aepClickEvent.commerce._commerceprojectbeacon.searchResultClicks = {
         value: 1
