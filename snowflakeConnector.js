@@ -1,4 +1,5 @@
 const csvtojson = require('csvtojson');
+const { create } = require('domain');
 const fs = require('fs');
 const moment = require('moment');
 
@@ -11,20 +12,26 @@ const moment = require('moment');
 // const atomicEventsFilePath = 'atomic_product_data.csv';
 // const aepEventsFilePath = 'aep_product_data.json';
 
-// const atomicEventsFilePath = 'tracked_searches_data.csv';
-// const aepEventsFilePath = 'tracked_searches_data.json';
+const atomicEventsFilePath = 'tracked_searches_data.csv';
+const aepEventsFilePath = 'tracked_searches_data.json';
 
-const atomicEventsFilePath = 'web_page_data.csv';
-const aepEventsFilePath = 'web_page_data.json';
+// const atomicEventsFilePath = 'web_page_data.csv';
+// const aepEventsFilePath = 'web_page_data.json';
 
 csvtojson()
   .fromFile(atomicEventsFilePath)
   .then((atomicEvents) => {
     /* IMPORT */
-    /* read from atomic events table - all events except for search */
-    const aepEvents = atomicEvents.map((atomicEvent) => convertAtomicEventToAEPEvent(atomicEvent));
+    let aepEvents;
 
-    /* read from trackes searches */
+    if (atomicEventsFilePath === 'tracked_searches_data.csv') {
+      /* read from trackes searches */
+      aepEvents = customMap(atomicEvents, convertTrackedSearchToAEPEventSet);
+    } else {
+      /* read from atomic events table - all events except for search */
+      aepEvents = atomicEvents.map((atomicEvent) => convertAtomicEventToAEPEvent(atomicEvent));
+    }
+
     /* EXPORT */
 
     /* write to file option - manually turn on/off */
@@ -37,40 +44,63 @@ csvtojson()
   })
   .catch((err) => console.error(err));
 
-function convertAtomicEventToAEPEvent(atomicEvent) {
-  const aepEvent = {
-    commerce: {
-      _commerceprojectbeacon: {
-        geo_country: atomicEvent.GEO_COUNTRY,
-        geo_region: atomicEvent.GEO_REGION,
-        geo_city: atomicEvent.GEO_CITY,
-        geo_zipcode: atomicEvent.GEO_ZIPCODE,
-        geo_latitude: Number(atomicEvent.GEO_LATITUDE),
-        geo_longitude: Number(atomicEvent.GEO_LONGITUDE),
-        geo_region_name: atomicEvent.GEO_REGION_NAME,
-        geo_timezone: atomicEvent.GEO_TIMEZONE,
-      },
-    },
-    _id: atomicEvent.EVENT_ID,
-    timestamp: moment(atomicEvent.COLLECTOR_TSTAMP, 'YYYY-MM-DD HH:mm:ss.SSS').toISOString(),
-    web: {
-      webPageDetails: {
-        URL: atomicEvent.PAGE_URL,
-      },
-      webReferrer: {
-        URL: atomicEvent.PAGE_REFERRER,
-        type: atomicEvent.REFR_MEDIUM === 'internal' ? 'internal' : 'search_engine',
-      }
-    },
-    identityMap: {
-      commerceShopperId: [
-        {
-          id: atomicEvent.DOMAIN_USERID,
-          primary: true
-        }
-      ]
+function convertTrackedSearchToAEPEventSet(trackedSearch) {
+  const eventSet = [];
+  const products = trackedSearch.PRODUCTS ? JSON.parse(trackedSearch.PRODUCTS) : [];
+
+  // console.log(JSON.stringify(products, null, 2));
+  const productsClicked = trackedSearch.PRODUCTS_CLICKED ? JSON.parse(trackedSearch.PRODUCTS_CLICKED) : [];
+
+  // tracked search has no clicks, send just event for view
+  if (!productsClicked || !productsClicked.length) {
+    const aepEvent = createBoilerPlateAEPEvent(trackedSearch);
+    
+    aepEvent.commerce._commerceprojectbeacon.searchResultViews = {
+      value: 1
     }
-  };
+
+    aepEvent.productListItems = products.map((product) => {
+      const aepProduct = {
+        priceTotal: product.price,
+        SKU: product.sku,
+        name: product.name,
+        productImageUrl: product.imageUrl,
+        currencyCode: 'USD', // TODO from storefront context
+      }
+      return aepProduct;
+    });;
+
+    eventSet.push(aepEvent);
+  } 
+  
+  // send an event for each click
+  if (productsClicked && productsClicked.length) {
+    // console.log(JSON.stringify(productsClicked));
+    productsClicked.forEach((clickedProduct) => {
+      const aepClickEvent = createBoilerPlateAEPEvent(trackedSearch);
+
+      aepClickEvent.commerce._commerceprojectbeacon.searchResultClicks = {
+        value: 1
+      }
+  
+      aepClickEvent.productListItems = [{
+        priceTotal: clickedProduct.price,
+        SKU: clickedProduct.sku,
+        name: clickedProduct.name,
+        productImageUrl: clickedProduct.imageUrl,
+        currencyCode: 'USD', // TODO from storefront context
+      }];
+  
+      eventSet.push(aepClickEvent);
+    });
+  }
+
+  // console.log(JSON.stringify(eventSet, null, 2));
+  return eventSet;
+}
+  
+function convertAtomicEventToAEPEvent(atomicEvent) {
+  const aepEvent = createBoilerPlateAEPEvent(atomicEvent);
 
   /* event type */
   if (atomicEvent.SE_CATEGORY === 'product' && atomicEvent.SE_ACTION === 'view') {
@@ -100,7 +130,6 @@ function convertAtomicEventToAEPEvent(atomicEvent) {
   } else {
     // assume page view for now
     aepEvent.web.webPageDetails = { value: 1 }
-    console.log(`unsupported category/action: ${atomicEvent.SE_CATEGORY}/${atomicEvent.SE_ACTION}`)
   }
 
   /* product data (AEP productListItems) */
@@ -151,4 +180,55 @@ function convertAtomicEventToAEPEvent(atomicEvent) {
   }
 
   return aepEvent;
+}
+
+function createBoilerPlateAEPEvent(atomicEvent){
+  const aepEvent = {
+    commerce: {
+      _commerceprojectbeacon: {
+        geo_country: atomicEvent.GEO_COUNTRY,
+        geo_region: atomicEvent.GEO_REGION,
+        geo_city: atomicEvent.GEO_CITY,
+        geo_zipcode: atomicEvent.GEO_ZIPCODE,
+        geo_latitude: Number(atomicEvent.GEO_LATITUDE),
+        geo_longitude: Number(atomicEvent.GEO_LONGITUDE),
+        geo_region_name: atomicEvent.GEO_REGION_NAME,
+        geo_timezone: atomicEvent.GEO_TIMEZONE,
+      },
+    },
+    _id: atomicEvent.EVENT_ID,
+    timestamp: moment(atomicEvent.COLLECTOR_TSTAMP, 'YYYY-MM-DD HH:mm:ss.SSS').toISOString(),
+    web: {
+      webPageDetails: {
+        URL: atomicEvent.PAGE_URL,
+      },
+      webReferrer: {
+        URL: atomicEvent.PAGE_REFERRER,
+        type: atomicEvent.REFR_MEDIUM === 'internal' ? 'internal' : 'search_engine',
+      }
+    },
+    identityMap: {
+      commerceShopperId: [
+        {
+          id: atomicEvent.DOMAIN_USERID,
+          primary: true
+        }
+      ]
+    }
+  };
+
+  return aepEvent;
+}
+
+function customMap(input, mapperCallback) {
+  const result = [];
+  for (const item of input) {
+    const mappedItems = mapperCallback(item);
+    if (Array.isArray(mappedItems)) {
+      result.push(...mappedItems);
+    } else {
+      result.push(mappedItems);
+    }
+  }
+  return result;
 }
